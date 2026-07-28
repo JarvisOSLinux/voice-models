@@ -39,7 +39,7 @@ discovered a different way.
 | faster-whisper | CTranslate2 weights | Hugging Face, fetched by the engine |
 | Piper | An ONNX voice + its `.onnx.json` config | Release assets, historically several different repos |
 | whisper.cpp | A single GGML/GGUF file | Release assets or a converted upload |
-| openWakeWord | An ONNX classifier + two shared preprocessor models | Release assets, some fetched at runtime |
+| openWakeWord | An ONNX classifier + two shared preprocessor models | Release assets, classifier and preprocessor published separately |
 
 So a project that wants to offer "pick a voice" has to hard-code five different
 acquisition strategies, and has nowhere to look up the things it actually needs
@@ -114,12 +114,15 @@ sync.
 
 | Top-level field | Description |
 |-----------------|-------------|
-| `version` | Format version of the index itself. `"1.0"`. |
-| `updated` | UTC timestamp, bumped by `sync_registry.py` whenever anything changed. |
+| `version` | Format version of the index itself. `"1.0"`. Required, and validated against the version the tooling implements — a consumer branches on this, so a bump is a deliberate edit to both the constant and the file. |
+| `updated` | UTC timestamp (`YYYY-MM-DDTHH:MM:SSZ`), written by `sync_registry.py` whenever anything changed. Required. |
 | `models` | Map of model id → entry. The key is the id. |
 
 Entry fields are documented in [`model-reference.md`](model-reference.md);
-everything except `manifest` and `integrity` is mirrored from the manifest.
+everything except `manifest` and `integrity` is mirrored from the manifest — and
+that is a closed set, not a convention. An entry key no manifest declares is a
+validation error, and `sync_registry.py` prunes it, because a field present only
+in the index is a claim the reviewer never read.
 
 Entries are written in one fixed field order, and `sync_registry.py` inserts a
 newly mirrored field at its anchor rather than appending it. This is purely for
@@ -252,8 +255,8 @@ done
 
 Then read `.audio` for the input contract (`sampleRateHz`, `frameSamples`) and
 `.notes` for anything the engine needs to be told — for this entry, that all three
-ONNX files must be passed explicitly or openWakeWord fetches its own preprocessor
-at runtime.
+ONNX files must be passed explicitly, because openWakeWord looks for its
+preprocessor inside its own package directory and raises if it isn't there.
 
 ### What a consumer should do with the metadata
 
@@ -264,7 +267,7 @@ at runtime.
 | `requirements` | Rule out models that will not fit the device. |
 | `license` | Decide whether the deployment may legally use it — surface `notes` to the user. |
 | `trustStatus` | Refuse `removed`, warn on `deprecated`, treat `community` as unreviewed. |
-| `audio` | Configure the capture/playback pipeline without guessing a sample rate. |
+| `audio` (manifest only) | Configure the capture/playback pipeline without guessing a sample rate. Read it from `model.json` after fetching it — it is not mirrored into the index. |
 
 A consumer should **cache `registry.json`** and re-fetch on a schedule rather than
 per query, and should treat a manifest whose hash does not match the index as a
@@ -293,13 +296,21 @@ compares `trustStatus` per entry against the base branch, and any entry raised t
 the `trust-approved` label, and re-runs on `labeled`/`unlabeled` so removing the
 label re-blocks the merge.
 
-Two changes are annotated for review without failing:
+Three changes are annotated for review without failing:
 
 - **a changed `license.spdx`** — a relicense reaches everyone who already deployed
   the model;
 - **a widened `platforms` list** — that field records what this registry actually
   exercised, so adding a platform is a claim about work someone did, not a
-  metadata tidy-up.
+  metadata tidy-up;
+- **a changed artifact `url` / `sha256`** (or a changed `huggingface`
+  `repo` / `revision`) — that pair decides which bytes a consumer downloads,
+  unpacks and hands to an engine, and the registry cannot verify a digest
+  itself. A digest that changed while `version` did not is called out
+  separately: a real upstream release bumps the version, so a silent swap on an
+  unchanged one is the strongest smell the diff can offer. CI fetches the base
+  branch's manifests alongside its `registry.json` for this; without them the
+  recorded `manifestSha256` still prompts a re-read of `source`.
 
 **Revocation is two stages.** First set `trustStatus: "removed"`: consumers refuse
 new installs, existing ones keep working, and the entry and its provenance stay
@@ -319,21 +330,27 @@ python3 scripts/selftest_registry.py       # prove the gate still fires
 
 Stdlib only, no dependencies, no network.
 
-`validate_registry.py` checks identity agreement (map key / entry id / manifest
-id / directory name / self-declared URL), every enum, the mirror against each
-manifest, the integrity hash, the shape of `requirements` / `license` / `source` /
-`audio`, and orphan directories. Malformed input is always a validation error and
-never a traceback: the gate runs on submissions from strangers, so every value is
-type-checked before it is used, and a nested list where a string belongs is
-reported rather than aborting the run.
+`validate_registry.py` checks the index's own `version` and `updated`, identity
+agreement (map key / entry id / manifest id / directory name / self-declared
+URL), every enum, the mirror against each manifest — in both directions, so a
+field no manifest declares is rejected as readily as one that disagrees — the
+integrity hash, the https scheme on the manifest and artifact URLs, the shape of
+`requirements` / `license` / `source` / `audio`, and orphan directories.
+Malformed input is always a validation error and never a traceback: the gate
+runs on submissions from strangers, so every value is type-checked before it is
+used, a nested list where a string belongs is reported rather than aborting the
+run, and JSON `null` is read as a broken value rather than an absent one.
 
 `selftest_registry.py` is the reason to trust the above. This repo has no test
 suite, and a validator that has quietly stopped firing looks exactly like a
 registry with nothing wrong — so the self-test builds throwaway registries in a
-temp directory, breaks them twenty different ways, and asserts the real entry
-points report exactly what they should, including the cases that must stay silent.
-CI runs it **before** the validator, so a broken gate fails the PR instead of
-waving it through.
+temp directory, breaks them in every way the gate is supposed to notice, and
+asserts the real entry points report exactly what they should, including the
+cases that must stay silent. Its last case is an audit: it reads every error and
+warning `validate_registry.py` can emit and fails if any of them never fired in
+a case above, so a check nobody asserts on cannot be added — or quietly
+deleted — without turning the run red. CI runs it **before** the validator, so a
+broken gate fails the PR instead of waving it through.
 
 ---
 

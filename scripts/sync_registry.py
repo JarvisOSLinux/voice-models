@@ -13,7 +13,10 @@ For each model entry in registry.json:
   - Mirrors the fields in SYNCED_FIELDS from the manifest into the entry
   - Drops a mirrored field the manifest no longer declares, so a field removed
     upstream cannot survive in the index as stale metadata
-  - Updates the top-level `updated` timestamp when anything changed
+  - Drops an index-only field no manifest backs at all, so hand-widening the
+    mirror is undone by the same command the validator tells you to run
+  - Repairs the top-level `version` / `updated` fields when they are absent or
+    malformed, and bumps `updated` when anything changed
 
 It deliberately does NOT download artifacts. Artifact hashes are computed by the
 submitter and checked during review; CI stays offline and fast. See
@@ -28,11 +31,28 @@ import datetime
 import hashlib
 import json
 import pathlib
+import re
 import sys
 
 REGISTRY = pathlib.Path("registry.json")
 MODELS_DIR = pathlib.Path("models")
 MANIFEST_FILE = "model.json"
+
+# Format version of the index document itself. A consumer that branches on
+# registry.json's `version` to decide how to parse it is relying on this, so a
+# bump is a deliberate, coordinated edit here and in registry.json — not
+# something a submission can carry in on its own.
+INDEX_FORMAT_VERSION = "1.0"
+
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+TIMESTAMP_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+# Distinguishes "the key is absent" from "the key is present and null". JSON
+# null is a legitimate value that a manifest can carry, so using None as the
+# absent-sentinel makes a null field invisible to the mirror in both
+# directions: it would neither be copied in nor pruned out, and the two scripts
+# would disagree forever with no mechanical way to converge.
+_MISSING = object()
 
 # Fields copied verbatim from the manifest into the index entry. Everything a
 # consumer needs to pick a model without fetching every manifest lives here:
@@ -71,6 +91,14 @@ FIELD_ANCHOR = {
     "trustStatus": "license",
 }
 
+# Every key an index entry may carry: its identity, where its manifest lives,
+# the mirror, and the integrity block this script writes. Anything else was
+# hand-written into registry.json, which means it was reviewed by nobody — the
+# reviewer reads the manifest, the consumer reads the index, and a field that
+# exists only in the index closes that loop with a claim no manifest ever made.
+# validate_registry.py imports this set so there is one definition of it.
+ALLOWED_ENTRY_FIELDS = ("id", "manifest") + SYNCED_FIELDS + ("integrity",)
+
 
 def sha256_file(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -108,13 +136,36 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    registry = json.loads(REGISTRY.read_text())
+    # Garbage in registry.json is the state validate_registry.py tells a
+    # contributor to run this script to fix, so this script has to survive it
+    # and say what is wrong — not hand back a traceback.
+    try:
+        registry = json.loads(REGISTRY.read_text())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
+        print(f"registry.json failed to parse: {e}")
+        return 1
+    if not isinstance(registry, dict):
+        print("registry.json: top level must be a JSON object")
+        return 1
+
     models = registry.get("models")
     if not isinstance(models, dict):
         print("registry.json: missing or malformed 'models' object")
         return 1
 
     changed = False
+
+    # The two fields that describe the index itself. A hand-authored index that
+    # never had them is repaired here, because validate_registry.py's error for
+    # a missing `version` says to run this script.
+    if registry.get("version") != INDEX_FORMAT_VERSION:
+        print(f"  registry: 'version' set to {INDEX_FORMAT_VERSION!r}")
+        registry["version"] = INDEX_FORMAT_VERSION
+        changed = True
+    updated = registry.get("updated")
+    if not isinstance(updated, str) or not TIMESTAMP_PATTERN.match(updated):
+        print("  registry: 'updated' timestamp missing or malformed")
+        changed = True
 
     for model_id, entry in models.items():
         if not isinstance(entry, dict):
@@ -131,16 +182,28 @@ def main() -> int:
             print(f"  SKIP {model_id}: {manifest_path} not found locally")
             continue
 
-        new_sha = sha256_file(manifest_path)
-        old_sha = entry.get("integrity", {}).get("manifestSha256", "")
+        try:
+            new_sha = sha256_file(manifest_path)
+        except OSError as e:
+            print(f"  SKIP {model_id}: {manifest_path} is not a readable file: {e}")
+            continue
+
+        # `integrity` is this script's to write, and the validator's advice for
+        # a hand-pasted one is "run sync_registry.py" — so normalize whatever is
+        # there into an object and repair it, rather than assuming it is one.
+        integrity = entry.get("integrity")
+        if not isinstance(integrity, dict):
+            integrity = {}
+            entry["integrity"] = integrity
+        old_sha = integrity.get("manifestSha256", "")
         if new_sha != old_sha:
             print(f"  {model_id}: manifestSha256 updated")
-            entry.setdefault("integrity", {})["manifestSha256"] = new_sha
+            integrity["manifestSha256"] = new_sha
             changed = True
 
         try:
             manifest = json.loads(manifest_path.read_text())
-        except json.JSONDecodeError as e:
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
             print(f"  SKIP {model_id}: {manifest_path} failed to parse: {e}")
             continue
         if not isinstance(manifest, dict):
@@ -153,11 +216,14 @@ def main() -> int:
                 # validate_registry.py fails on it — so this tool has to prune
                 # in that direction too, or removing a field from a manifest
                 # leaves an error that nothing but a hand edit can clear.
-                if entry.pop(field, None) is not None:
+                # Membership, not pop's return value: a stale `null` in the
+                # index is a key to drop like any other.
+                if field in entry:
+                    del entry[field]
                     print(f"  {model_id}: '{field}' dropped (manifest no longer declares it)")
                     changed = True
                 continue
-            if manifest[field] != entry.get(field):
+            if manifest[field] != entry.get(field, _MISSING):
                 print(f"  {model_id}: '{field}' synced from manifest")
                 is_new = field not in entry
                 entry[field] = manifest[field]
@@ -165,14 +231,26 @@ def main() -> int:
                     move_after(entry, field, FIELD_ANCHOR[field])
                 changed = True
 
+        # Whatever is left over was never backed by a manifest. Pruning it here
+        # is what makes the validator's error mechanically fixable, and keeps
+        # the rule in one direction: the manifest is the source of truth.
+        for field in sorted(set(entry) - set(ALLOWED_ENTRY_FIELDS)):
+            del entry[field]
+            print(f"  {model_id}: '{field}' dropped (no manifest backs it)")
+            changed = True
+
     if changed:
         if args.check:
             print("\nFAIL: registry.json is out of sync. Run scripts/sync_registry.py to fix.")
             return 1
         registry["updated"] = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
+            TIMESTAMP_FORMAT
         )
-        REGISTRY.write_text(json.dumps(registry, indent=2) + "\n")
+        # `version`/`updated` describe the document, so they lead it even when
+        # this run is what added them to a hand-authored index.
+        ordered = {key: registry[key] for key in ("version", "updated") if key in registry}
+        ordered.update(registry)
+        REGISTRY.write_text(json.dumps(ordered, indent=2) + "\n")
         print("\nregistry.json updated.")
     else:
         print("All derived fields are already up to date.")

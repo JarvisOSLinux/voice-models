@@ -27,7 +27,7 @@ model is discovered a different way:
 | faster-whisper | CTranslate2 weights | Hugging Face, fetched by the engine |
 | Piper | An ONNX voice + its `.onnx.json` config | Release assets, historically across several repos |
 | whisper.cpp | A single GGML/GGUF file | Release assets or a converted upload |
-| openWakeWord | An ONNX classifier + two shared preprocessor models | Release assets, some fetched at runtime |
+| openWakeWord | An ONNX classifier + two shared preprocessor models | Release assets, classifier and preprocessor published separately |
 
 So every project that wants to offer "pick a voice" writes five acquisition
 strategies, hard-codes a handful of URLs, and still has nowhere to look up

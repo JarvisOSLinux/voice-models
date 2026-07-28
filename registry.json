@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-07-28T01:07:50Z",
+  "updated": "2026-07-28T02:18:48Z",
   "models": {
     "piper.en-us-lessac-medium": {
       "id": "piper.en-us-lessac-medium",
@@ -63,7 +63,7 @@
       "trustStatus": "community",
       "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis/model.json",
       "integrity": {
-        "manifestSha256": "df52ee6429562a9bfca7e75da3c06953b108c0290f6e373e076f3d446a61c007"
+        "manifestSha256": "db1a87dfa8578a75590ed49c18621617eb402d853e88dd6ff21dc694ca07e31a"
       }
     }
   }

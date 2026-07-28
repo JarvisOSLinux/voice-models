@@ -59,17 +59,21 @@ a sentence, transcribe a clip, score a frame. Note the **engine version** you
 used; it goes in `notes`.
 
 ```bash
-tar -xzf voice-en-us-lessac-medium.tar.gz
-echo 'Registry verification.' | piper -m en-us-lessac-medium.onnx -f out.wav
+mkdir unpacked && tar -xzf voice-en-us-lessac-medium.tar.gz -C unpacked
+echo 'Registry verification.' | piper -m unpacked/en-us-lessac-medium.onnx -f out.wav
 soxi out.wav        # confirm non-trivial, non-silent audio — and read the real sample rate
 ```
 
 **3. Measure the cost.**
 
 ```bash
-du -sm .                                    # diskMb, unpacked
+du -sm unpacked   # diskMb — unpacked model files only, excluding the archive
 /usr/bin/time -v <your run command> 2>&1 | grep 'Maximum resident'   # ramMb
 ```
+
+Extract into a directory of its own and measure *that*. `diskMb` is the unpacked
+size (`docs/model-reference.md` § requirements); measuring the working directory
+counts the downloaded archive and the output WAV too, which roughly doubles it.
 
 Approximate is fine and expected — say how you measured it in `notes`.
 
@@ -115,7 +119,8 @@ models/
 ```
 
 Ids are lowercase and dotted, `<engine>.<model-name>`, matching
-`^[a-z0-9]+(\.[a-z0-9][a-z0-9-]*)+$`:
+`^[a-z0-9][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)+$` — both halves take a hyphen, since
+two of the engines do (`faster-whisper`, `whisper-cpp`):
 
 - `piper.en-us-lessac-medium`
 - `openwakeword.hey-jarvis`
@@ -185,9 +190,10 @@ Four things to get right:
 - **`platforms` is what you ran it on.** Not what upstream claims. One OS is a
   perfectly good entry; someone else can widen it later in a PR of their own.
 - **List every artifact the model needs to run.** The openWakeWord entry carries
-  three files because the engine otherwise downloads its preprocessor models at
-  runtime from wherever it likes. "Fetch this entry" should be a complete,
-  offline-able operation.
+  three files because the engine otherwise expects its preprocessor models in
+  its own package directory, put there by a separate unverified
+  `openwakeword.utils.download_models()` call. "Fetch this entry" should be a
+  complete, offline-able operation.
 
 ---
 
@@ -213,6 +219,11 @@ Do **not** hand-write `languages`, `capabilities`, `platforms`, `requirements`,
 `license`, or `integrity`. Those are mirrored from your manifest by the sync
 script, and a hand-edited mirror is exactly the failure the validator exists to
 catch.
+
+Nor any other field. An entry carries its identity, its `manifest` URL, the
+mirrored fields and `integrity` — nothing else. Anything extra fails validation
+and `sync_registry.py` deletes it, because a field only the index has is one no
+reviewer ever read.
 
 ---
 
@@ -272,16 +283,20 @@ CI then runs the self-test, the validator, and the sync check. All three must pa
 Edit the manifest, re-run `sync_registry.py`, and say in the PR body what you
 re-verified.
 
-Two changes get an automatic review annotation and deserve explicit evidence:
+Three changes get an automatic review annotation and deserve explicit evidence:
 
 - **A widened `platforms` list.** This field records what the registry actually
   exercised, so adding `darwin` means *you ran it on macOS* — show that.
 - **A changed `license.spdx`.** A relicense reaches everyone who already deployed
   the model. Link to where upstream states the new terms.
+- **A changed artifact `url` or `sha256`** (or `huggingface` `repo`/`revision`).
+  That pair decides which bytes everyone downloads next; paste the `sha256sum`
+  of the file you actually fetched.
 
 If the artifacts themselves changed — a new upstream release — bump `version` and
 replace the hashes, having downloaded and run the new files. Do not edit a hash
-without re-downloading.
+without re-downloading. A digest that moves while `version` stays put gets its
+own annotation asking why, so say so in the PR body if there is a good reason.
 
 ---
 

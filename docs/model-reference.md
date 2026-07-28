@@ -42,11 +42,15 @@ registry.json                                 ← sync_registry.py writes this
 A model id is lowercase and dotted: `<engine>.<model-name>`.
 
 ```
-^[a-z0-9]+(\.[a-z0-9][a-z0-9-]*)+$
+^[a-z0-9][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)+$
 ```
 
 Examples: `piper.en-us-lessac-medium`, `openwakeword.hey-jarvis`,
 `vosk.en-us-small-0.15`, `faster-whisper.small`.
+
+Both halves take a hyphen. The engine half has to, because `faster-whisper` and
+`whisper-cpp` carry one in their names — an id pattern that rejected them would
+block two of the five engines this registry already vouches for.
 
 Four things must agree, and the validator enforces all four:
 
@@ -87,6 +91,14 @@ another model's directory, where every other field looks plausible.
 
 `integrity` appears **only** in the index entry — a manifest cannot contain its
 own hash.
+
+The index entry carries exactly the fields marked *Mirrored: Yes* above, plus
+`id`, `manifest` and `integrity`. That is a closed set the validator enforces:
+any other key in an entry is an error, and `sync_registry.py` removes it. A
+field that exists only in the index was reviewed by nobody, since the reviewer
+reads the manifest and the consumer reads the index. If a consumer needs
+something new, add it to the manifest **and** to `SYNCED_FIELDS`, in the same
+PR.
 
 ---
 
@@ -315,7 +327,8 @@ both, because a consumer would have to guess where the bytes come from.
 
 **Multiple items are normal.** `openwakeword.hey-jarvis` has three: the wake-word
 classifier plus openWakeWord's two shared preprocessor models, which the engine
-would otherwise download at runtime from wherever it likes. List every file the
+otherwise expects to find in its own package directory, put there by a separate
+unverified `openwakeword.utils.download_models()` call. List every file the
 model needs to run, so that "fetch this entry" is a complete, offline-able
 operation.
 
