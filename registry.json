@@ -1,0 +1,70 @@
+{
+  "version": "1.0",
+  "updated": "2026-07-28T02:18:48Z",
+  "models": {
+    "piper.en-us-lessac-medium": {
+      "id": "piper.en-us-lessac-medium",
+      "name": "Piper Lessac (medium, en-US)",
+      "summary": "Single-speaker U.S. English VITS neural text-to-speech voice for the Piper engine, trained from scratch on the Blizzard 2013 Lessac corpus.",
+      "version": "0.0.2",
+      "kind": "tts",
+      "engine": "piper",
+      "languages": [
+        "en-us"
+      ],
+      "capabilities": [
+        "streaming"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 61,
+        "ramMb": 191,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "LicenseRef-Blizzard2013-Lessac",
+        "url": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+        "notes": "Upstream declares no SPDX identifier: the voice MODEL_CARD names only the Blizzard 2013 Lessac dataset license at the url above, whose text was not retrievable from the verification environment; Piper upstream adds that voices are 'intended for personal use and text to speech research only' and that it imposes no additional restrictions - review the dataset license before commercial use."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/piper.en-us-lessac-medium/model.json",
+      "integrity": {
+        "manifestSha256": "83a5e275e34c29ee09bb0bec8a0829f46a441a341b8501a2d2b7aed1bd4de751"
+      }
+    },
+    "openwakeword.hey-jarvis": {
+      "id": "openwakeword.hey-jarvis",
+      "name": "openWakeWord hey jarvis",
+      "summary": "Wake-word model that scores 80 ms frames of 16 kHz mono audio for the spoken phrase \"hey jarvis\", run through openWakeWord's ONNX pipeline.",
+      "version": "0.1",
+      "kind": "wake",
+      "engine": "openwakeword",
+      "languages": [
+        "en"
+      ],
+      "capabilities": [
+        "streaming"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 4,
+        "ramMb": 256,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "CC-BY-NC-SA-4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "notes": "Non-commercial only: the upstream repository's LICENSE file is Apache-2.0 but that covers the code, and openWakeWord's README licenses all included pre-trained models, this one among them, under CC-BY-NC-SA-4.0."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis/model.json",
+      "integrity": {
+        "manifestSha256": "db1a87dfa8578a75590ed49c18621617eb402d853e88dd6ff21dc694ca07e31a"
+      }
+    }
+  }
+}

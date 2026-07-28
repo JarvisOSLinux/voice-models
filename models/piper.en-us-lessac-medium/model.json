@@ -1,0 +1,51 @@
+{
+  "id": "piper.en-us-lessac-medium",
+  "name": "Piper Lessac (medium, en-US)",
+  "summary": "Single-speaker U.S. English VITS neural text-to-speech voice for the Piper engine, trained from scratch on the Blizzard 2013 Lessac corpus.",
+  "version": "0.0.2",
+  "kind": "tts",
+  "engine": "piper",
+  "languages": [
+    "en-us"
+  ],
+  "capabilities": [
+    "streaming"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "requirements": {
+    "diskMb": 61,
+    "ramMb": 191,
+    "accelerator": "cpu"
+  },
+  "license": {
+    "spdx": "LicenseRef-Blizzard2013-Lessac",
+    "url": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+    "notes": "Upstream declares no SPDX identifier: the voice MODEL_CARD names only the Blizzard 2013 Lessac dataset license at the url above, whose text was not retrievable from the verification environment; Piper upstream adds that voices are 'intended for personal use and text to speech research only' and that it imposes no additional restrictions - review the dataset license before commercial use."
+  },
+  "trustStatus": "community",
+  "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/piper.en-us-lessac-medium/model.json",
+  "upstream": {
+    "project": "https://github.com/OHF-Voice/piper1-gpl",
+    "homepage": "https://github.com/rhasspy/piper"
+  },
+  "source": {
+    "type": "artifacts",
+    "items": [
+      {
+        "url": "https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-en-us-lessac-medium.tar.gz",
+        "sha256": "d45ca50084c0558eb9581cd7d26938043bc8853513da47c63b94d95a2367a5c9",
+        "sizeBytes": 58197843,
+        "format": "tar.gz",
+        "unpack": true
+      }
+    ]
+  },
+  "audio": {
+    "sampleRateHz": 16000,
+    "channels": 1,
+    "sampleWidthBits": 16
+  },
+  "notes": "Exercised in-session on Linux x86_64 with piper-tts 1.6.0 (OHF-Voice piper1-gpl) + onnxruntime 1.28.0 on CPU: the 2023 voice format loads unmodified and synthesized 5.888 s of non-silent 16 kHz mono audio. Upstream MODEL_CARD states 22,050 Hz, but the shipped config and every produced WAV are 16000 Hz - sampleRateHz records the measured value. Unpacks to en-us-lessac-medium.onnx + .onnx.json + MODEL_CARD; requirements are approximate (diskMb = extracted bytes, ramMb = measured peak RSS of the CLI process)."
+}
