@@ -1,0 +1,67 @@
+{
+  "id": "openwakeword.hey-jarvis",
+  "name": "openWakeWord hey jarvis",
+  "summary": "Wake-word model that scores 80 ms frames of 16 kHz mono audio for the spoken phrase \"hey jarvis\", run through openWakeWord's ONNX pipeline.",
+  "version": "0.1",
+  "kind": "wake",
+  "engine": "openwakeword",
+  "languages": [
+    "en"
+  ],
+  "capabilities": [
+    "streaming"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "requirements": {
+    "diskMb": 4,
+    "ramMb": 256,
+    "accelerator": "cpu"
+  },
+  "license": {
+    "spdx": "CC-BY-NC-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "notes": "Non-commercial only: the upstream repository's LICENSE file is Apache-2.0 but that covers the code, and openWakeWord's README licenses all included pre-trained models, this one among them, under CC-BY-NC-SA-4.0."
+  },
+  "trustStatus": "community",
+  "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis/model.json",
+  "upstream": {
+    "project": "https://github.com/dscripka/openWakeWord",
+    "homepage": "https://github.com/dscripka/openWakeWord/blob/v0.5.1/docs/models/hey_jarvis.md"
+  },
+  "source": {
+    "type": "artifacts",
+    "items": [
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/hey_jarvis_v0.1.onnx",
+        "sha256": "94a13cfe60075b132f6a472e7e462e8123ee70861bc3fb58434a73712ee0d2cb",
+        "sizeBytes": 1271370,
+        "format": "onnx",
+        "unpack": false
+      },
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/melspectrogram.onnx",
+        "sha256": "ba2b0e0f8b7b875369a2c89cb13360ff53bac436f2895cced9f479fa65eb176f",
+        "sizeBytes": 1087958,
+        "format": "onnx",
+        "unpack": false
+      },
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/embedding_model.onnx",
+        "sha256": "70d164290c1d095d1d4ee149bc5e00543250a7316b59f31d056cff7bd3075c1f",
+        "sizeBytes": 1326578,
+        "format": "onnx",
+        "unpack": false
+      }
+    ]
+  },
+  "audio": {
+    "sampleRateHz": 16000,
+    "channels": 1,
+    "sampleFormat": "int16",
+    "frameSamples": 1280,
+    "frameMs": 80
+  },
+  "notes": "All three ONNX artifacts are required together: melspectrogram.onnx and embedding_model.onnx are openWakeWord's shared preprocessor and must be passed as melspec_model_path / embedding_model_path or the engine falls back to fetching them at runtime. Vetted 2026-07-28 on Linux x86_64 with openwakeword 0.6.0 + onnxruntime 1.28.0. The .tflite variants of the same release are deliberately not cataloged: they were not exercised here."
+}
