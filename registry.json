@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-07-28T02:18:48Z",
+  "updated": "2026-07-30T00:26:41Z",
   "models": {
     "piper.en-us-lessac-medium": {
       "id": "piper.en-us-lessac-medium",
@@ -63,7 +63,39 @@
       "trustStatus": "community",
       "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis/model.json",
       "integrity": {
-        "manifestSha256": "db1a87dfa8578a75590ed49c18621617eb402d853e88dd6ff21dc694ca07e31a"
+        "manifestSha256": "fce623703f5f08899773e9eed9df5457561d3fb44071815471fb0139464785be"
+      }
+    },
+    "openwakeword.hey-jarvis-tflite": {
+      "id": "openwakeword.hey-jarvis-tflite",
+      "name": "openWakeWord hey jarvis (tflite)",
+      "summary": "Wake-word model that scores 80 ms frames of 16 kHz mono audio for the spoken phrase \"hey jarvis\", run through openWakeWord's TensorFlow Lite pipeline. Same model as openwakeword.hey-jarvis, packaged for consumers that run tflite_runtime instead of onnxruntime.",
+      "version": "0.1",
+      "kind": "wake",
+      "engine": "openwakeword",
+      "languages": [
+        "en"
+      ],
+      "capabilities": [
+        "streaming"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 4,
+        "ramMb": 256,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "CC-BY-NC-SA-4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "notes": "Non-commercial only: the upstream repository's LICENSE file is Apache-2.0 but that covers the code, and openWakeWord's README licenses all included pre-trained models, this one among them, under CC-BY-NC-SA-4.0."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis-tflite/model.json",
+      "integrity": {
+        "manifestSha256": "69b52b365762256c96a1af3920e7f4f9a6bbdb7667993b817c2c87b6c3a1db5a"
       }
     }
   }

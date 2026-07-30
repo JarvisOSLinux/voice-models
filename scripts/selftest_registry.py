@@ -586,6 +586,17 @@ def source_gate_fires():
         check(code == 0, "a well-formed engine-managed huggingface source validates")
         check("::error::" not in out, "nothing is reported for a pinned HF revision")
 
+    # tflite is a first-class artifact format (openWakeWord ships its wake
+    # models both as onnx and tflite): an artifact declaring it validates,
+    # the same way onnx/tar.gz do.
+    tflite_item = {**copy.deepcopy(ARTIFACT), "format": "tflite", "unpack": False}
+    with fixture(manifest(kind="wake", engine="openwakeword",
+                          source={"type": "artifacts", "items": [tflite_item]})):
+        sync()
+        code, out = validate()
+        check(code == 0, "an artifact declaring the tflite format validates")
+        check("::error::" not in out, "nothing is reported for a tflite artifact")
+
 
 @case
 def audio_gate_fires():
