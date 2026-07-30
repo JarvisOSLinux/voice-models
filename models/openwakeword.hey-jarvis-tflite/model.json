@@ -1,0 +1,67 @@
+{
+  "id": "openwakeword.hey-jarvis-tflite",
+  "name": "openWakeWord hey jarvis (tflite)",
+  "summary": "Wake-word model that scores 80 ms frames of 16 kHz mono audio for the spoken phrase \"hey jarvis\", run through openWakeWord's TensorFlow Lite pipeline. Same model as openwakeword.hey-jarvis, packaged for consumers that run tflite_runtime instead of onnxruntime.",
+  "version": "0.1",
+  "kind": "wake",
+  "engine": "openwakeword",
+  "languages": [
+    "en"
+  ],
+  "capabilities": [
+    "streaming"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "requirements": {
+    "diskMb": 4,
+    "ramMb": 256,
+    "accelerator": "cpu"
+  },
+  "license": {
+    "spdx": "CC-BY-NC-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "notes": "Non-commercial only: the upstream repository's LICENSE file is Apache-2.0 but that covers the code, and openWakeWord's README licenses all included pre-trained models, this one among them, under CC-BY-NC-SA-4.0."
+  },
+  "trustStatus": "community",
+  "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis-tflite/model.json",
+  "upstream": {
+    "project": "https://github.com/dscripka/openWakeWord",
+    "homepage": "https://github.com/dscripka/openWakeWord/blob/v0.5.1/docs/models/hey_jarvis.md"
+  },
+  "source": {
+    "type": "artifacts",
+    "items": [
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/hey_jarvis_v0.1.tflite",
+        "sha256": "14bff778604985e1b5c19f0f7bbe477a69cf281d8db34b232b3b972411f710e2",
+        "sizeBytes": 1278912,
+        "format": "tflite",
+        "unpack": false
+      },
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/melspectrogram.tflite",
+        "sha256": "96fa0adccb6e8cf95cb14465409a1a2898ee4a96a85bb9ed3c7eb0e68bf163e8",
+        "sizeBytes": 1092516,
+        "format": "tflite",
+        "unpack": false
+      },
+      {
+        "url": "https://github.com/dscripka/openWakeWord/releases/download/v0.5.1/embedding_model.tflite",
+        "sha256": "c0aea21eb84a4ce90a08c870da41b7a7173b45269e6a3207c71d67c40f3a59d8",
+        "sizeBytes": 1330312,
+        "format": "tflite",
+        "unpack": false
+      }
+    ]
+  },
+  "audio": {
+    "sampleRateHz": 16000,
+    "channels": 1,
+    "sampleFormat": "int16",
+    "frameSamples": 1280,
+    "frameMs": 80
+  },
+  "notes": "All three tflite artifacts are required together: melspectrogram.tflite and embedding_model.tflite are openWakeWord's shared preprocessor and must be passed as melspec_model_path / embedding_model_path with inference_framework=\"tflite\"; openWakeWord otherwise resolves them inside its own package directory (openwakeword/resources/models/) and fails rather than fetching anything - the download only happens on an explicit openwakeword.utils.download_models() call. Vetted 2026-07-30 on Linux x86_64 with openwakeword 0.6.0 + tflite_runtime 2.14.0: instantiated with inference_framework=\"tflite\" and predict() run over silence and noise frames (TFLite XNNPACK delegate active). IMPORTANT: tflite_runtime 2.14.0 is built against NumPy 1.x - it aborts with 'AttributeError: _ARRAY_API not found' under NumPy 2.x, so pin numpy<2 (verified here on numpy 1.26.4). The ONNX packaging (openwakeword.hey-jarvis) has no such constraint."
+}

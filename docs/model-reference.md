@@ -322,7 +322,7 @@ both, because a consumer would have to guess where the bytes come from.
 | `url` | https URL | Direct download. Must be stable — a release asset, not a "latest" redirect. |
 | `sha256` | 64 lowercase hex | **Required.** The consumer verifies this after download. |
 | `sizeBytes` | positive int | Exact size. Lets a consumer show progress and refuse an obviously wrong response. |
-| `format` | enum | `zip`, `tar.gz`, `onnx`, `json`, `bin`. |
+| `format` | enum | `zip`, `tar.gz`, `onnx`, `tflite`, `json`, `bin`. |
 | `unpack` | bool | Whether the consumer should extract it after verifying. |
 
 **Multiple items are normal.** `openwakeword.hey-jarvis` has three: the wake-word
@@ -394,8 +394,8 @@ One free-text field, and the most useful one in the manifest. Use it for:
 - **where upstream's documentation is wrong**, and what the measurement was;
 - **how the artifacts fit together** — which of them are required together, what
   the tarball unpacks to;
-- **what was deliberately left out** — the openWakeWord entry records that the
-  `.tflite` variants exist and were not cataloged, because nobody exercised them.
+- **what was deliberately left out** — when a variant is not cataloged, say
+  whether it was skipped for lack of exercise or tried and rejected.
 
 The last one matters more than it looks: a reader who finds a gap should be able
 to tell "nobody got to this yet" from "this was tried and rejected".

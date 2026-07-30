@@ -81,7 +81,7 @@ ALLOWED_ENGINES = {"vosk", "faster-whisper", "whisper-cpp", "piper", "openwakewo
 ALLOWED_TRUST = {"community", "official", "deprecated", "removed"}
 ALLOWED_PLATFORMS = {"linux", "darwin", "windows"}
 ALLOWED_ACCELERATORS = {"cpu", "cuda", "any"}
-ALLOWED_ARTIFACT_FORMATS = {"zip", "tar.gz", "onnx", "json", "bin"}
+ALLOWED_ARTIFACT_FORMATS = {"zip", "tar.gz", "onnx", "tflite", "json", "bin"}
 ALLOWED_SOURCE_TYPES = {"artifacts", "huggingface"}
 
 # Documented v1 capability vocabulary. Unknown values warn rather than fail —
