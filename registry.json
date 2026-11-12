@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-07-30T00:26:41Z",
+  "updated": "2026-10-09T18:57:15Z",
   "models": {
     "piper.en-us-lessac-medium": {
       "id": "piper.en-us-lessac-medium",
@@ -96,6 +96,104 @@
       "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/openwakeword.hey-jarvis-tflite/model.json",
       "integrity": {
         "manifestSha256": "69b52b365762256c96a1af3920e7f4f9a6bbdb7667993b817c2c87b6c3a1db5a"
+      }
+    },
+    "vosk.en-us-small-0.15": {
+      "id": "vosk.en-us-small-0.15",
+      "name": "Vosk small (en-US, 0.15)",
+      "summary": "Lightweight wideband U.S. English streaming speech-recognition model for the Vosk (Kaldi) engine, built for mobile and Raspberry Pi class devices. Some consumers also use it as a keyword-spotting wake-word engine.",
+      "version": "0.15",
+      "kind": "stt",
+      "engine": "vosk",
+      "languages": [
+        "en-us"
+      ],
+      "capabilities": [
+        "streaming"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 68,
+        "ramMb": 213,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "Apache-2.0",
+        "url": "https://alphacephei.com/vosk/models",
+        "notes": "Stated in the License column of Alpha Cephei's model list for vosk-model-small-en-us-0.15. The archive itself ships no LICENSE file (only a README with 'Copyright 2020 Alpha Cephei Inc'), so the model list is the only upstream statement."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/vosk.en-us-small-0.15/model.json",
+      "integrity": {
+        "manifestSha256": "afe0f56a840af209eac6741b2a5cc2737880c2490df20d7bf36d49546c337d39"
+      }
+    },
+    "faster-whisper.small": {
+      "id": "faster-whisper.small",
+      "name": "faster-whisper small (multilingual)",
+      "summary": "Multilingual Whisper small speech-recognition checkpoint converted to CTranslate2 format for the faster-whisper engine. Transcribes with punctuation, casing and word-level timestamps.",
+      "version": "2023-11-23",
+      "kind": "stt",
+      "engine": "faster-whisper",
+      "languages": [
+        "multilingual"
+      ],
+      "capabilities": [
+        "punctuation",
+        "word-timestamps"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 464,
+        "ramMb": 1214,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "MIT",
+        "url": "https://huggingface.co/Systran/faster-whisper-small",
+        "notes": "Read from the `license: mit` front matter of the model card (README.md) shipped inside the pinned revision, which is also what the Hugging Face API reports. The converted weights derive from OpenAI's Whisper, which is itself MIT-licensed."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/faster-whisper.small/model.json",
+      "integrity": {
+        "manifestSha256": "b4fbe13054f7b298a747e46fe417a5c61c52daec7c32b288a8fb3e72c41947e3"
+      }
+    },
+    "faster-whisper.medium": {
+      "id": "faster-whisper.medium",
+      "name": "faster-whisper medium (multilingual)",
+      "summary": "Multilingual Whisper medium speech-recognition checkpoint converted to CTranslate2 format for the faster-whisper engine. Transcribes with punctuation, casing and word-level timestamps.",
+      "version": "2023-11-23",
+      "kind": "stt",
+      "engine": "faster-whisper",
+      "languages": [
+        "multilingual"
+      ],
+      "capabilities": [
+        "punctuation",
+        "word-timestamps"
+      ],
+      "platforms": [
+        "linux"
+      ],
+      "requirements": {
+        "diskMb": 1460,
+        "ramMb": 2360,
+        "accelerator": "cpu"
+      },
+      "license": {
+        "spdx": "MIT",
+        "url": "https://huggingface.co/Systran/faster-whisper-medium",
+        "notes": "Read from the `license: mit` front matter of the model card (README.md) shipped inside the pinned revision, which is also what the Hugging Face API reports. The converted weights derive from OpenAI's Whisper, which is itself MIT-licensed."
+      },
+      "trustStatus": "community",
+      "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/faster-whisper.medium/model.json",
+      "integrity": {
+        "manifestSha256": "782fed7d5c2d05f3b9c754ab78c5dd35b875d6b246ffaa59fb9ead242feaa817"
       }
     }
   }

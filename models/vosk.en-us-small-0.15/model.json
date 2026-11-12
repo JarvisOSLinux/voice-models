@@ -1,0 +1,51 @@
+{
+  "id": "vosk.en-us-small-0.15",
+  "name": "Vosk small (en-US, 0.15)",
+  "summary": "Lightweight wideband U.S. English streaming speech-recognition model for the Vosk (Kaldi) engine, built for mobile and Raspberry Pi class devices. Some consumers also use it as a keyword-spotting wake-word engine.",
+  "version": "0.15",
+  "kind": "stt",
+  "engine": "vosk",
+  "languages": [
+    "en-us"
+  ],
+  "capabilities": [
+    "streaming"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "requirements": {
+    "diskMb": 68,
+    "ramMb": 213,
+    "accelerator": "cpu"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "url": "https://alphacephei.com/vosk/models",
+    "notes": "Stated in the License column of Alpha Cephei's model list for vosk-model-small-en-us-0.15. The archive itself ships no LICENSE file (only a README with 'Copyright 2020 Alpha Cephei Inc'), so the model list is the only upstream statement."
+  },
+  "trustStatus": "community",
+  "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/vosk.en-us-small-0.15/model.json",
+  "upstream": {
+    "project": "https://github.com/alphacep/vosk-api",
+    "homepage": "https://alphacephei.com/vosk/models"
+  },
+  "source": {
+    "type": "artifacts",
+    "items": [
+      {
+        "url": "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",
+        "sha256": "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
+        "sizeBytes": 41205931,
+        "format": "zip",
+        "unpack": true
+      }
+    ]
+  },
+  "audio": {
+    "sampleRateHz": 16000,
+    "channels": 1,
+    "sampleWidthBits": 16
+  },
+  "notes": "Exercised 2026-10-09 on Linux x86_64 with vosk 0.3.45 (Python 3.13) on CPU: loaded the unpacked model and ran KaldiRecognizer over a 16 kHz mono 16-bit WAV synthesized with espeak-ng; it returned a transcript ('magistrate my with occasion but with brown fox jumps over the lazy nod' for 'Registry verification. The quick brown fox jumps over the lazy dog.'), so output is real but accuracy on synthetic speech was not assessed. diskMb is `du -sm` of the unpacked directory (the zip lists 70898967 bytes across 20 files). ramMb is peak RSS of the whole Python process (ru_maxrss 213 MB), including the interpreter and vosk. Upstream reports 10.38 WER on tedlium and 9.85 on librispeech test-clean, 0.11xRT, unverified here. The audio contract is the sample rate the recognizer was constructed with; Vosk accepts any, 16000 is the one exercised."
+}

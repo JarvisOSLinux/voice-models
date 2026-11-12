@@ -1,0 +1,46 @@
+{
+  "id": "faster-whisper.small",
+  "name": "faster-whisper small (multilingual)",
+  "summary": "Multilingual Whisper small speech-recognition checkpoint converted to CTranslate2 format for the faster-whisper engine. Transcribes with punctuation, casing and word-level timestamps.",
+  "version": "2023-11-23",
+  "kind": "stt",
+  "engine": "faster-whisper",
+  "languages": [
+    "multilingual"
+  ],
+  "capabilities": [
+    "punctuation",
+    "word-timestamps"
+  ],
+  "platforms": [
+    "linux"
+  ],
+  "requirements": {
+    "diskMb": 464,
+    "ramMb": 1214,
+    "accelerator": "cpu"
+  },
+  "license": {
+    "spdx": "MIT",
+    "url": "https://huggingface.co/Systran/faster-whisper-small",
+    "notes": "Read from the `license: mit` front matter of the model card (README.md) shipped inside the pinned revision, which is also what the Hugging Face API reports. The converted weights derive from OpenAI's Whisper, which is itself MIT-licensed."
+  },
+  "trustStatus": "community",
+  "manifest": "https://raw.githubusercontent.com/JarvisOSLinux/voice-models/main/models/faster-whisper.small/model.json",
+  "upstream": {
+    "project": "https://github.com/SYSTRAN/faster-whisper",
+    "homepage": "https://huggingface.co/Systran/faster-whisper-small"
+  },
+  "source": {
+    "type": "huggingface",
+    "repo": "Systran/faster-whisper-small",
+    "revision": "536b0662742c02347bc0e980a01041f333bce120",
+    "engineManaged": true
+  },
+  "audio": {
+    "sampleRateHz": 16000,
+    "channels": 1,
+    "sampleWidthBits": 16
+  },
+  "notes": "The version is the revision's last-modified date (2023-11-23); upstream tags no release. Exercised 2026-10-09 on Linux x86_64, CPU, with faster-whisper 1.2.1 + ctranslate2 4.8.2 + av 15.1.0 (Python 3.13), compute_type=int8, beam_size=1: downloaded the pinned revision with huggingface_hub.snapshot_download and transcribed a 16 kHz mono 16-bit WAV synthesized with espeak-ng. Language auto-detected as en (p=0.96); output was 'Registry verification. The quick brown fox dumps over the lazy dog.' for 'Registry verification. The quick brown fox jumps over the lazy dog.'; word_timestamps=True returned 11 words with start/end times. Wall time 6.3 s including model load. diskMb is `du -sm` of the downloaded revision (~484 MB of weights, excluding the .cache metadata directory). ramMb is peak RSS of the whole Python process (ru_maxrss), int8 on CPU. IMPORTANT: faster-whisper 1.2.1 fails with \"TypeError: open() got an unexpected keyword argument 'metadata_errors'\" against av 19.0.1, which pip resolves by default; pin av<16 (verified on 15.1.0). The audio contract is what the engine resamples to internally (any input is decoded and converted to 16 kHz mono); 16000 is the one exercised. Not run on GPU, macOS or Windows."
+}
